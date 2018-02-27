@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "DummyData";
+}
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.1.min.js" type="text/javascript"></script>
+<script>
+    $(function () {
+        $('.edit-mode').hide();
+        $('.edit-data').on('click', function () {
+            var tr = $(this).parents('tr:first');
+            tr.find('.edit-mode, .display-mode').toggle();
+        });
+        $('.save-data').on('click', function () {
+            var tr = $(this).parents('tr:first');
+            var ID = $(this).prop('id');
+            var firstname = tr.find('#FirstName').val();
+            var lastname = tr.find('#LastName').val();
+            $.post(
+                'EditDummyData', 
+                { ID: ID, FirstName: firstname, LastName: lastname },
+                function (item) {                    
+                    tr.find('#firstname').text(item.FirstName);
+                    tr.find('#lastname').text(item.LastName);                    
+                }, "json");
+            tr.find('.edit-mode, .display-mode').toggle();
+        });
+    })
+</script>
+<div id="grid">
+    <table width="100%">
+
+        <tr>
+            <td>
+
+                @{
+                    var grid = new WebGrid(Model, canPage: true, rowsPerPage: 5,
+                    selectionFieldName: "selectedRow", ajaxUpdateContainerId: "gridContent");
+                    grid.Pager(WebGridPagerModes.All);}
+
+
+                @grid.GetHtml(tableStyle: "table",
+        headerStyle: "header",
+        alternatingRowStyle: "alt",
+        selectedRowStyle: "select",
+        columns: grid.Columns(
+        grid.Column("FirstName",
+                      style: "col2",
+                      format: @<text>
+                        <span id="firstname" class="display-mode">@item.FirstName</span>
+                        <input type="text" class="edit-mode" size="45" value="@item.FirstName" id="FirstName" />
+                    </text>),
+grid.Column("LastName",
+style: "col2",
+format: @<text>
+    <span id="lastname" class="display-mode">@item.LastName</span>
+    <input type="text" class="edit-mode" size="45" value="@item.LastName" id="LastName" />
+</text>),
+grid.Column("",
+style: "col1",
+format: @<text>
+    <button class="edit-data display-mode" id="@item.ID">Edit</button>
+    <button class="save-data edit-mode" id="@item.ID">Save</button>
+</text>)
+
+))
+
+            </td>
+        </tr>
+    </table>
+</div> 
